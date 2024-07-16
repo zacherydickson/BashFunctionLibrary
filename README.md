@@ -17,11 +17,12 @@ A [test script](runTests.sh), is included which will test the basic functionalit
 
 ## Number Processing
 
-[IsNumeric](scripts/IsNumeric.sh): Uses regular expressions to determine if a string contains a numeric value of different types; see the file for all numeric types supported
+[IsNumeric](scripts/IsNumeric.sh): Uses regular expressions to determine if a string is a numeric value of different types; see the file for all numeric types supported
 
 ## String Processing
 
 [JoinBy](scripts/JoinBy.sh): Given an arbitrary delimiter, join an arbitrary number of arguments into a string
+
 [RandomString](scripts/RandomString.sh): Generates a string of a given length which will make valid file names
 
 ## Variables
