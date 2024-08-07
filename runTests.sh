@@ -6,7 +6,7 @@ NC="\033[0m"
 
 execDir=$(dirname $(readlink -f $0));
 
-cd "$execDir/scripts";
+cd "$execDir/functions";
 VERBOSE=1
 
 while getopts 'q' opts; do
