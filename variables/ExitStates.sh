@@ -1,2 +1,3 @@
 export EXIT_FAILURE=1
 export EXIT_SUCCESS=0
+export EXIT_TIMEOUT=124
