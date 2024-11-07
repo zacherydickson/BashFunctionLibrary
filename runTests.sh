@@ -8,10 +8,16 @@ execDir=$(dirname $(readlink -f $0));
 
 cd "$execDir/functions";
 VERBOSE=1
+TargetScript="";
 
-while getopts 'q' opts; do
+while getopts 's:q' opts; do
 	case $opts in
-		q) VERBOSE=0;;
+		s)
+			TargetScript=$OPTARG
+			;;
+		q)
+			VERBOSE=0
+			;;
 	esac
 done
 
@@ -29,6 +35,13 @@ Script="CheckDependency"
 testList["$Script:basic"]='./CheckDependency.sh ls'
 testList["$Script:noarg"]='! ./CheckDependency.sh 2> /dev/null'
 testList["$Script:missing"]='! ./CheckDependency.sh NonSen-seCommand_ 2> /dev/null'
+Script="CheckFile"
+testList["$Script:basic"]='./CheckFile.sh CheckFile.sh'
+testList["$Script:noarg"]='! ./CheckFile.sh 2> /dev/null'
+testList["$Script:missing"]='! ./CheckFile.sh MiSsInGfIlE 2> /dev/null'
+testList["$Script:missing:desc"]='./CheckFile.sh MiSsInGfIlE Descriptor 2>&1 | grep -q Descriptor'
+testList["$Script:missing:warn"]='./CheckFile.sh MiSsInGfIlE Desc WARNING 2>&1 | grep -q WARNING'
+testList["$Script:empty"]='! ./CheckFile.sh ../testData/empty_file 2> /dev/null'
 Script="IsNumeric"
 #		 0	     1    2    3      4   5     6    7  8    9          10 		
 #		 11      12   13   14     15  16    17   18 19   20         21
@@ -80,12 +93,12 @@ done
 Script="RandomString"
 testList["$Script:noarg"]='res=$(./RandomString.sh) && [ ${#res} -gt 0 ]'
 testList["$Script:length:10"]='res=$(./RandomString.sh 10) && [ ${#res} -eq 10 ]'
-testList["$Script:length:0a"]='res=$(./RandomString.sh 0 2>&1 1>/dev/null) && ! [ -z $res ]'
-testList["$Script:length:0b"]='res=$(./RandomString.sh 0) && [ ${#res} -gt 0 ]'
+testList["$Script:length:0a"]='res=$(./RandomString.sh 0 2>&1 1>/dev/null) && ! [ -z "$res" ]'
+testList["$Script:length:0b"]='res=$(./RandomString.sh 0 2> /dev/null) && ! [ -z $res ]'
 testList["$Script:float:a"]='res=$(./RandomString.sh 6.5 2>&1 1>/dev/null) && [ -z $res ]'
 testList["$Script:float:b"]='res=$(./RandomString.sh 6.5) && [ ${#res} -eq 6 ]'
-testList["$Script:str:a"]='res=$(./RandomString.sh mouse 2>&1 1>/dev/null) && ! [ -z $res ]'
-testList["$Script:str:b"]='res=$(./RandomString.sh mouse) && [ ${#res} -gt 0 ]'
+testList["$Script:str:a"]='res=$(./RandomString.sh mouse 2>&1 1>/dev/null) && ! [ -z "$res" ]'
+testList["$Script:str:b"]='res=$(./RandomString.sh mouse 2> /dev/null) && ! [ -z $res ]'
 
 ###############
 #Run the tests
@@ -96,6 +109,9 @@ for key in "${!testList[@]}"; do
 done |
 	sort | #Do the tests in a consistent order
 while read -r key; do
+	if ! [ -z "$TargetScript" ]; then
+		! [[ $key =~ "$TargetScript" ]] && continue;
+	fi
 	eval "${testList[${key}]}" || { >&2 echo -e "[${RED}FAIL${NC}] $key"; continue; }
 	[ $VERBOSE -eq 1 ] && >&2 echo -e "[${GREEN}PASS${NC}] $key"
 done

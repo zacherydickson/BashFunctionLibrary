@@ -13,7 +13,9 @@ A [test script](runTests.sh), is included which will test the basic functionalit
 
 ## Pipeline Development
 
-[CheckDependency](scripts/CheckDependency.sh): Given a command, checks if it can be found in the PATH variable
+[CheckDependency](scripts/CheckDependency.sh): Given a command, checks if it can be found in the PATH variable. If the dependency fails an error message is produced
+
+[CheckFile](scripts/CheckFile.sh): Given a path to a file, checks if the file exists and is non-empty; can optionally provide a sort description of the file and an error level to provide more detailed messages on failure
 
 ## Number Processing
 
