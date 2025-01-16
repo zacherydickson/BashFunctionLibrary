@@ -4,11 +4,33 @@ Each function is encapsulated in its own script, which is also callable from the
 
 The scripts are grouped together by functional category.
 
-A [test script](runTests.sh), is included which will test the basic functionality of each function. It can be run with
+A [test script](runTests.sh) is included which will test the basic functionality of each function. It can be run with
 ```
     ./runTests.sh
     #Failures only
     ./runTests/sh -q
+```
+
+# Uses the Library Files in your scripts
+
+To use the functions and variables included in this library one can source the files as needed. For ease of access one might set up environment variables to the function and variable directories included. For example:
+
+```
+ export BASHFUNCLIB="/home/user/BashFunctionLibrary/functions"
+ source "$BASHFUNCLIB/CheckDependency.sh"
+```
+
+Alternatively, a [find script](findLibFiles.sh) is included to return absolute paths based on a search of basename prefixes in this library. One could add this script to their path and call it from other scripts to get files names to source. For example:
+
+```
+    source $(findLibFiles.sh RandomStr);
+    source $(findLibFiles.sh IsNumeric.sh);
+```
+
+If this grows unwieldy, one could use this script in a loop:
+
+```
+    findLibFiles.sh Check Rand | while read -r f; do source "$f"; done
 ```
 
 ## Pipeline Development
