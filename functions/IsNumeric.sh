@@ -62,6 +62,7 @@ function IsNumeric {
 		esac
 	fi
 	if ! [[ $val =~ $re ]]; then
+		>&2 echo "[INFO] $val is not a $numType number"
         return $EXIT_FAILURE;
     fi
 }
