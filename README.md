@@ -30,7 +30,7 @@ Alternatively, a [find script](findLibFiles.sh) is included to return absolute p
 If this grows unwieldy, one could use this script in a loop:
 
 ```
-    findLibFiles.sh Check Rand | while read -r f; do source "$f"; done
+    for src in $(findLibFiles.sh Check Rand); do source "$f"; done
 ```
 
 ## Pipeline Development
