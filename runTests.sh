@@ -77,7 +77,7 @@ for numType in "${numTypeList[@]}"; do
 			val="";
 		fi
 		key="$Script:$numType:$val"
-		testStr="./IsNumeric.sh $val $numType"
+		testStr="./IsNumeric.sh $val $numType 2> /dev/null"
 		#For unrecognized numeric types we want to also check that the warning is printed
 		if [ $numType == "Unrecognized" ] && [ $i -lt ${#testVal[@]} ]; then
 			testStr="res=\$($testStr 2>&1) && ! [ -z \"\$res\" ]"
