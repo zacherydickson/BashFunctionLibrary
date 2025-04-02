@@ -8,7 +8,7 @@ A [test script](runTests.sh) is included which will test the basic functionality
 ```
     ./runTests.sh
     #Failures only
-    ./runTests/sh -q
+    ./runTests.sh -q
 ```
 
 # Uses the Library Files in your scripts
