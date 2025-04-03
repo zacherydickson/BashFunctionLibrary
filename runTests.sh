@@ -104,29 +104,46 @@ testList["$Script:str:b"]='res=$(./RandomString.sh mouse 2> /dev/null) && ! [ -z
 #Run the tests
 ###############
 
-for key in "${!testList[@]}"; do
-	echo $key;
-done |
-	sort | #Do the tests in a consistent order
+declare -A TestCount;
+declare -A PassCount;
+FinalRes="${GREEN}All Tests Pass${NC}"
+
 while read -r key; do
-    IFS=":" keyFields=($key);
-    script="${keyFields[0]}"
+    script=$(echo $key | awk -F ':' '{print $1}');
 	if ! [ -z "$TargetScript" ]; then
 		! [[ $key =~ "$TargetScript" ]] && continue;
 	fi
     #Test in the command line call configuration
 	if eval "${testList[${key}]}"; then
 	    [ $VERBOSE -eq 1 ] && >&2 echo -e "[${GREEN}PASS${NC}] $key"
+        ((PassCount[$script]++))
     else
         >&2 echo -e "[${RED}FAIL${NC}] $key";
+        FinalRes="${RED}Some Tests Failed${NC}"
     fi
     #Test in the sourced configuration
-    cmd="( cd ..; source functions/$script.sh; ${testList[${key}]/.\/$script.sh/$script} 2>/dev/null; )"
+    cmd="( cd ..; source functions/$script.sh; ${testList[${key}]/.\/$script.sh/$script} 2>/dev/null; )";
     if eval "$cmd"; then
 	    [ $VERBOSE -eq 1 ] && >&2 echo -e "[${GREEN}PASS${NC}] $key:sourced"
+        ((PassCount[$script]++))
     else
         >&2 echo -e "[${RED}FAIL${NC}] $key:sourced"; 
+        FinalRes="${RED}Some Tests Failed${NC}"
     fi
-done
+    ((TestCount[$script]+=2))
+done < <( for k in "${!testList[@]}"; do echo $k; done | sort )
+#Process Redirect to prevent subshells and sort
 
 
+while read -r script; do
+	if ! [ -z "$TargetScript" ]; then
+		! [[ $script =~ "$TargetScript" ]] && continue;
+    fi
+    result="[${GREEN}PASS${NC}]"
+    ((PassCount[$script]+=0))
+    [ ${PassCount[$script]} -lt ${TestCount[$script]} ] && result="[${RED}FAIL${NC}]"
+    >&2 printf "%b %20s: %4d / %4d Passing\n" $result $script ${PassCount[$script]} ${TestCount[$script]}
+done < <( for s in "${!TestCount[@]}"; do echo $s; done | sort)
+#Process Redirect to prevent subshells and sort
+
+>&2 echo -e "$FinalRes"
