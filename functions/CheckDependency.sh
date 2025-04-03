@@ -4,15 +4,21 @@
 #Inputs - a command
 #Output - None, check exit status
 function CheckDependency {
-	local exit_failure=1;
-	depend=$1; shift
-	if [ -z $depend ]; then
-		>&2 echo "[ERROR] Attempt to check an empty dependency"
-		return $exit_failure;
-	elif ! which $depend > /dev/null; then
-		>&2 echo "[ERROR] Could not locate $depend, install or check your PATH"
-		return $exit_failure;
-	fi
+    #Subshell to prevent variable leakage
+    (
+        execDir=$(dirname $(readlink -f ${BASH_SOURCE[0]}));
+        source "$execDir/../variables/ExitStates.sh" || return 1;
+    	depend=$1; shift
+    	if [ -z $depend ]; then
+    		>&2 echo "[ERROR] Attempt to check an empty dependency"
+    		return $EXIT_FAILURE;
+    	elif ! which $depend > /dev/null; then
+    		>&2 echo "[ERROR] Could not locate $depend, install or check your PATH"
+    		return $EXIT_FAILURE;
+    	fi
+    )
+    #Forward subshell exit code
+    return $?;
 }
 
 if [ ${BASH_SOURCE[0]} == ${0} ]; then

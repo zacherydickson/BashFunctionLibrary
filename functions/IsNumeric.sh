@@ -18,53 +18,59 @@
 #			UnitIV:			[0,1]εR
 #Output - None, check exit status
 function IsNumeric {
-	local EXIT_FAILURE=1;
-    val=$1; shift;
-	#strip off leading and trailing spaces and tabs
-	val=$(sed 's/^[[:blank:]]*//' <<< "$val" | sed 's/[[:blank:]]*$//')
-	numType=$1; shift;
-	[ -z $numType ] && numType="Real"
-	if ! [ -z $numType ]; then
-		case $numType in
-			#Optional sign, followed by at least one digit, with optional point something
-			Real)			re="^[+-]?[0-9]+([.][0-9]+)?$";;
-			#Optional positive, followed by either zero point non-zero, 
-			#	or at least one non-zero, with an optional point something
-			PosReal)		re="^[+]?(0[.][0-9]*[1-9][0-9]*|[0-9]*[1-9][0-9]*([.][0-9]+)?)$";;
-			#Optional positive, followed by at least one digit with optional point something
-			# or negative zero with optional point zero
-			NonNegReal)		re="^([+]?[0-9]+([.][0-9]+)?|-0([.]0+)?)$";;
-			#Required negative, followed by either zero point non-zero,
-			#	or at least one non zero with optional point something
-			NegReal)		re="^-(0.[0-9]*[1-9][0-9]*|[0-9]*[1-9]+[0-9]*([.][0-9]+)?)$";;
-			#Either optionally positive zero with optional point zero or negative something point something
-			NonPosReal)		re="^([+]?0([.]0+)?|-[0-9]+([.][0-9]+)?)$";;
-			#Optional Sign with at least one digit
-			Int)			re="^[+-]?[0-9]+$";;
-			#Optional positive with at least one non-zero digit
-			PosInt) : ;&
-			Natural)		re="^[+]?[0-9]*[1-9]+[0-9]*$";;
-			#Optional positive with at least one digit, or negative zero
-			NonNegInt) : ;&
-			Whole)			re="^([+]?[0-9]+|-0)$";;
-			#Required negative with at least one non-zero digit
-			NegInt)			re="^-[0-9]*[1-9]+[0-9]*$";;
-			#Either optionally signed zero, or required sign with at least one digit
-			NonPosInt)			re="^[+-]?0$|^-[0-9]+$";;
-			#Either X with optional point zero (X is either optionally positive 1 or optionally signed 0)
-			# or optionally positive zero with optional point something
-			UnitIV)			re="^(([+]?1|[+-]?0)([.]0+)?|[+]?0([.][0-9]+)?)$";;
-			*) 
-				re="^[+-]?[0-9]+([.][0-9]+)?$"
-				>&2 echo "[WARNING] Unrecognized numeric type ($numType) argument to IsNumeric - assuming Real"
-				;;
+    #Subshell to prevent variable leakage
+    (
+        execDir=$(dirname $(readlink -f ${BASH_SOURCE[0]}));
+        source "$execDir/../variables/ExitStates.sh" || return 1;
+        val=$1; shift;
+	    #strip off leading and trailing spaces and tabs
+	    val=$(sed 's/^[[:blank:]]*//' <<< "$val" | sed 's/[[:blank:]]*$//')
+	    numType=$1; shift;
+	    [ -z $numType ] && numType="Real"
+	    if ! [ -z $numType ]; then
+	    	case $numType in
+	    		#Optional sign, followed by at least one digit, with optional point something
+	    		Real)			re="^[+-]?[0-9]+([.][0-9]+)?$";;
+	    		#Optional positive, followed by either zero point non-zero, 
+	    		#	or at least one non-zero, with an optional point something
+	    		PosReal)		re="^[+]?(0[.][0-9]*[1-9][0-9]*|[0-9]*[1-9][0-9]*([.][0-9]+)?)$";;
+	    		#Optional positive, followed by at least one digit with optional point something
+	    		# or negative zero with optional point zero
+	    		NonNegReal)		re="^([+]?[0-9]+([.][0-9]+)?|-0([.]0+)?)$";;
+	    		#Required negative, followed by either zero point non-zero,
+	    		#	or at least one non zero with optional point something
+	    		NegReal)		re="^-(0.[0-9]*[1-9][0-9]*|[0-9]*[1-9]+[0-9]*([.][0-9]+)?)$";;
+	    		#Either optionally positive zero with optional point zero or negative something point something
+	    		NonPosReal)		re="^([+]?0([.]0+)?|-[0-9]+([.][0-9]+)?)$";;
+	    		#Optional Sign with at least one digit
+	    		Int)			re="^[+-]?[0-9]+$";;
+	    		#Optional positive with at least one non-zero digit
+	    		PosInt) : ;&
+	    		Natural)		re="^[+]?[0-9]*[1-9]+[0-9]*$";;
+	    		#Optional positive with at least one digit, or negative zero
+	    		NonNegInt) : ;&
+	    		Whole)			re="^([+]?[0-9]+|-0)$";;
+	    		#Required negative with at least one non-zero digit
+	    		NegInt)			re="^-[0-9]*[1-9]+[0-9]*$";;
+	    		#Either optionally signed zero, or required sign with at least one digit
+	    		NonPosInt)		re="^[+-]?0$|^-[0-9]+$";;
+	    		#Either X with optional point zero (X is either optionally positive 1 or optionally signed 0)
+	    		# or optionally positive zero with optional point something
+	    		UnitIV)			re="^(([+]?1|[+-]?0)([.]0+)?|[+]?0([.][0-9]+)?)$";;
+	    		*) 
+	    			re="^[+-]?[0-9]+([.][0-9]+)?$"
+	    			>&2 echo "[WARNING] Unrecognized numeric type ($numType) argument to IsNumeric - assuming Real"
+	    			;;
 
-		esac
-	fi
-	if ! [[ $val =~ $re ]]; then
-		>&2 echo "[INFO] $val is not a $numType number"
-        return $EXIT_FAILURE;
-    fi
+	    	esac
+	    fi
+	    if ! [[ $val =~ $re ]]; then
+	    	>&2 echo "[INFO] $val is not a $numType number"
+            return $EXIT_FAILURE;
+        fi
+    )
+    #Forward subshell result
+    return $?
 }
 
 if [ ${BASH_SOURCE[0]} == ${0} ]; then

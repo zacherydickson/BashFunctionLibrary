@@ -9,10 +9,15 @@
 #		- An arbitraty number of arguments
 #Output - A delimited string
 function JoinBy {
-	local d=${1-} f=${2-}
-	if shift 2; then
-		printf %s "$f" "${@/#/$d}"
-	fi
+    #Run in a subshell to prevent variable leakage
+    (
+        execDir=$(dirname $(readlink -f ${BASH_SOURCE[0]}));
+	    local d=${1-} f=${2-}
+	    if shift 2; then
+	    	printf %s "$f" "${@/#/$d}"
+	    fi
+    )
+    return $?
 }
 
 if [ ${BASH_SOURCE[0]} == ${0} ]; then

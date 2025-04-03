@@ -36,7 +36,7 @@ testList["$Script:basic"]='./CheckDependency.sh ls'
 testList["$Script:noarg"]='! ./CheckDependency.sh 2> /dev/null'
 testList["$Script:missing"]='! ./CheckDependency.sh NonSen-seCommand_ 2> /dev/null'
 Script="CheckFile"
-testList["$Script:basic"]='./CheckFile.sh CheckFile.sh'
+testList["$Script:basic"]="./CheckFile.sh $execDir/README.md"
 testList["$Script:noarg"]='! ./CheckFile.sh 2> /dev/null'
 testList["$Script:missing"]='! ./CheckFile.sh MiSsInGfIlE 2> /dev/null'
 testList["$Script:missing:desc"]='./CheckFile.sh MiSsInGfIlE Descriptor 2>&1 | grep -q Descriptor'
@@ -109,11 +109,17 @@ for key in "${!testList[@]}"; do
 done |
 	sort | #Do the tests in a consistent order
 while read -r key; do
+    IFS=":" keyFields=($key);
+    script="${keyFields[0]}"
 	if ! [ -z "$TargetScript" ]; then
 		! [[ $key =~ "$TargetScript" ]] && continue;
 	fi
 	eval "${testList[${key}]}" || { >&2 echo -e "[${RED}FAIL${NC}] $key"; continue; }
 	[ $VERBOSE -eq 1 ] && >&2 echo -e "[${GREEN}PASS${NC}] $key"
+    #Test in the sourced configuration
+    cmd="( cd ..; source functions/$script.sh; ${testList[${key}]/.\/$script.sh/$script} 2>/dev/null; )"
+    eval "$cmd" || { >&2 echo -e "[${RED}FAIL${NC}] $key:sourced"; continue; }
+	[ $VERBOSE -eq 1 ] && >&2 echo -e "[${GREEN}PASS${NC}] $key:sourced"
 done
 
 

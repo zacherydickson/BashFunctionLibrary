@@ -1,6 +1,8 @@
 # Bash Function Library
 A collection of Bash scripts intended to be used as a library of common, source-able functions
 Each function is encapsulated in its own script, which is also callable from the command line.
+The function defined within each script matches the name of the script.
+For example JoinBy.sh defines the function JoinBy.
 
 The scripts are grouped together by functional category.
 
@@ -11,7 +13,7 @@ A [test script](runTests.sh) is included which will test the basic functionality
     ./runTests.sh -q
 ```
 
-# Uses the Library Files in your scripts
+# Use the Library Files in your scripts
 
 To use the functions and variables included in this library one can source the files as needed. For ease of access one might set up environment variables to the function and variable directories included. For example:
 
