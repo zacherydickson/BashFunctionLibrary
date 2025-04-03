@@ -114,12 +114,19 @@ while read -r key; do
 	if ! [ -z "$TargetScript" ]; then
 		! [[ $key =~ "$TargetScript" ]] && continue;
 	fi
-	eval "${testList[${key}]}" || { >&2 echo -e "[${RED}FAIL${NC}] $key"; continue; }
-	[ $VERBOSE -eq 1 ] && >&2 echo -e "[${GREEN}PASS${NC}] $key"
+    #Test in the command line call configuration
+	if eval "${testList[${key}]}"; then
+	    [ $VERBOSE -eq 1 ] && >&2 echo -e "[${GREEN}PASS${NC}] $key"
+    else
+        >&2 echo -e "[${RED}FAIL${NC}] $key";
+    fi
     #Test in the sourced configuration
     cmd="( cd ..; source functions/$script.sh; ${testList[${key}]/.\/$script.sh/$script} 2>/dev/null; )"
-    eval "$cmd" || { >&2 echo -e "[${RED}FAIL${NC}] $key:sourced"; continue; }
-	[ $VERBOSE -eq 1 ] && >&2 echo -e "[${GREEN}PASS${NC}] $key:sourced"
+    if eval "$cmd"; then
+	    [ $VERBOSE -eq 1 ] && >&2 echo -e "[${GREEN}PASS${NC}] $key:sourced"
+    else
+        >&2 echo -e "[${RED}FAIL${NC}] $key:sourced"; 
+    fi
 done
 
 
