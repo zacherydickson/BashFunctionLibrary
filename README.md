@@ -41,6 +41,8 @@ If this grows unwieldy, one could use this script in a loop:
 
 [CheckFile](scripts/CheckFile.sh): Given a path to a file, checks if the file exists and is non-empty; can optionally provide a sort description of the file and an error level to provide more detailed messages on failure
 
+[CheckVersion](scripts/CheckVersion.sh): Checks if a given semantic version meets a given target version; target can be exact (`V1.21.13`) a minimum (`V1.1+`) or a range (`V2.2.4-v3`)
+
 ## Number Processing
 
 [IsNumeric](scripts/IsNumeric.sh): Uses regular expressions to determine if a string is a numeric value of different types; see the file for all numeric types supported
@@ -50,6 +52,8 @@ If this grows unwieldy, one could use this script in a loop:
 [JoinBy](scripts/JoinBy.sh): Given an arbitrary delimiter, join an arbitrary number of arguments into a string
 
 [RandomString](scripts/RandomString.sh): Generates a string of a given length which will make valid file names
+
+[ParseSemanticVersion](scripts/ParseSemanticVersion.sh): Extracts major minor and patch numbers for a semantic version string, missing or non-integer values default to 0
 
 ## Variables
 

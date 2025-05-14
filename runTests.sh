@@ -99,6 +99,15 @@ testList["$Script:float:a"]='res=$(./RandomString.sh 6.5 2>&1 1>/dev/null) && [ 
 testList["$Script:float:b"]='res=$(./RandomString.sh 6.5) && [ ${#res} -eq 6 ]'
 testList["$Script:str:a"]='res=$(./RandomString.sh mouse 2>&1 1>/dev/null) && ! [ -z "$res" ]'
 testList["$Script:str:b"]='res=$(./RandomString.sh mouse 2> /dev/null) && ! [ -z $res ]'
+Script="ParseSemanticVersion"
+testList["$Script:noarg"]='[ -z $(./ParseSemanticVersion.sh 2> /dev/null) ]'
+testList["$Script:basic"]='[[ $(./ParseSemanticVersion.sh V10.5.6) == "10 5 6" ]]'
+testList["$Script:no-v"]='[[ $(./ParseSemanticVersion.sh 10.5.6) == "10 5 6" ]]'
+testList["$Script:lower-v"]='[[ $(./ParseSemanticVersion.sh v10.5.6) == "10 5 6" ]]'
+testList["$Script:nonsv"]='[[ $(./ParseSemanticVersion.sh may24e7) == "0 0 0" ]]'
+testList["$Script:nopatch"]='[[ $(./ParseSemanticVersion.sh V10.5) == "10 5 0" ]]'
+testList["$Script:majoronly"]='[[ $(./ParseSemanticVersion.sh V10) == "10 0 0" ]]'
+testList["$Script:mixedsv"]='[[ $(./ParseSemanticVersion.sh V10.5.24e7) == "10 5 0" ]]'
 
 ###############
 #Run the tests
