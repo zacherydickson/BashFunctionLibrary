@@ -42,6 +42,20 @@ testList["$Script:missing"]='! ./CheckFile.sh MiSsInGfIlE 2> /dev/null'
 testList["$Script:missing:desc"]='./CheckFile.sh MiSsInGfIlE Descriptor 2>&1 | grep -q Descriptor'
 testList["$Script:missing:warn"]='./CheckFile.sh MiSsInGfIlE Desc WARNING 2>&1 | grep -q WARNING'
 testList["$Script:empty"]='! ./CheckFile.sh ../testData/empty_file 2> /dev/null'
+Script="CheckVersion"
+testList["$Script:noarg"]='! res=$(./CheckVersion.sh 2>&1 1>/dev/null) && [ -n "$res" ]'
+testList["$Script:nover"]='! res=$(./CheckVersion.sh V1.25.6 2>&1 1>/dev/null) && [ -n "$res" ]'
+testList["$Script:exact"]='./CheckVersion.sh V1.25.6 V1.25.6'
+testList["$Script:exact:nopat"]='./CheckVersion.sh V1.25 V1.25'
+testList["$Script:exact:nomin"]='./CheckVersion.sh V1 V1'
+testList["$Script:exact:lomaj"]='! res=$(./CheckVersion.sh V1.25.6 V0.25.6) && [ -z "$res" ]'
+testList["$Script:exact:himaj"]='! res=$(./CheckVersion.sh V1.25.6 V2.6) && [ -z "$res" ]'
+testList["$Script:exact:lomin"]='! res=$(./CheckVersion.sh V1.25 v1.14.1) && [ -z "$res" ]'
+testList["$Script:exact:himin"]='! res=$(./CheckVersion.sh v1.25 V1.26) && [ -z "$res" ]'
+testList["$Script:exact:lopat"]='! res=$(./CheckVersion.sh V1.25.2 v1.25.1) && [ -z "$res" ]'
+testList["$Script:exact:hipat"]='! res=$(./CheckVersion.sh v1.25.2 V1.25.3) && [ -z "$res" ]'
+testList["$Script:min:lopat"]='! res=$(./CheckVersion.sh v1.25.2 V1.25.3+) && [ -z "$res" ]'
+#TODO: Tests for Min and range cases
 Script="IsNumeric"
 #		 0	     1    2    3      4   5     6    7  8    9          10 		
 #		 11      12   13   14     15  16    17   18 19   20         21
@@ -80,7 +94,7 @@ for numType in "${numTypeList[@]}"; do
 		testStr="./IsNumeric.sh $val $numType 2> /dev/null"
 		#For unrecognized numeric types we want to also check that the warning is printed
 		if [ $numType == "Unrecognized" ] && [ $i -lt ${#testVal[@]} ]; then
-			testStr="res=\$($testStr 2>&1) && ! [ -z \"\$res\" ]"
+			testStr="res=\$($testStr 2>&1) && [ -n \"\$res\" ]"
 		fi
 		#test if the negate list is exhausted			test if the current index is the next negate Idx
 		if [ $negateIdxIdx -lt ${#negateIdxList[@]} ] && [ $i -eq ${negateIdxList[$negateIdxIdx]} ]; then
@@ -90,15 +104,6 @@ for numType in "${numTypeList[@]}"; do
 		testList["$key"]="$testStr"
 	done
 done
-Script="RandomString"
-testList["$Script:noarg"]='res=$(./RandomString.sh) && [ ${#res} -gt 0 ]'
-testList["$Script:length:10"]='res=$(./RandomString.sh 10) && [ ${#res} -eq 10 ]'
-testList["$Script:length:0a"]='res=$(./RandomString.sh 0 2>&1 1>/dev/null) && ! [ -z "$res" ]'
-testList["$Script:length:0b"]='res=$(./RandomString.sh 0 2> /dev/null) && ! [ -z $res ]'
-testList["$Script:float:a"]='res=$(./RandomString.sh 6.5 2>&1 1>/dev/null) && [ -z $res ]'
-testList["$Script:float:b"]='res=$(./RandomString.sh 6.5) && [ ${#res} -eq 6 ]'
-testList["$Script:str:a"]='res=$(./RandomString.sh mouse 2>&1 1>/dev/null) && ! [ -z "$res" ]'
-testList["$Script:str:b"]='res=$(./RandomString.sh mouse 2> /dev/null) && ! [ -z $res ]'
 Script="ParseSemanticVersion"
 testList["$Script:noarg"]='[ -z $(./ParseSemanticVersion.sh 2> /dev/null) ]'
 testList["$Script:basic"]='[[ $(./ParseSemanticVersion.sh V10.5.6) == "10 5 6" ]]'
@@ -108,6 +113,16 @@ testList["$Script:nonsv"]='[[ $(./ParseSemanticVersion.sh may24e7) == "0 0 0" ]]
 testList["$Script:nopatch"]='[[ $(./ParseSemanticVersion.sh V10.5) == "10 5 0" ]]'
 testList["$Script:majoronly"]='[[ $(./ParseSemanticVersion.sh V10) == "10 0 0" ]]'
 testList["$Script:mixedsv"]='[[ $(./ParseSemanticVersion.sh V10.5.24e7) == "10 5 0" ]]'
+Script="RandomString"
+testList["$Script:noarg"]='res=$(./RandomString.sh) && [ ${#res} -gt 0 ]'
+testList["$Script:length:10"]='res=$(./RandomString.sh 10) && [ ${#res} -eq 10 ]'
+testList["$Script:length:0a"]='res=$(./RandomString.sh 0 2>&1 1>/dev/null) && [ -n "$res" ]'
+testList["$Script:length:0b"]='res=$(./RandomString.sh 0 2> /dev/null) && [ -n $res ]'
+testList["$Script:float:a"]='res=$(./RandomString.sh 6.5 2>&1 1>/dev/null) && [ -z $res ]'
+testList["$Script:float:b"]='res=$(./RandomString.sh 6.5) && [ ${#res} -eq 6 ]'
+testList["$Script:str:a"]='res=$(./RandomString.sh mouse 2>&1 1>/dev/null) && [ -n "$res" ]'
+testList["$Script:str:b"]='res=$(./RandomString.sh mouse 2> /dev/null) && [ -n $res ]'
+
 
 ###############
 #Run the tests
@@ -119,7 +134,7 @@ FinalRes="${GREEN}All Tests Pass${NC}"
 
 while read -r key; do
     script=$(echo $key | awk -F ':' '{print $1}');
-	if ! [ -z "$TargetScript" ]; then
+	if [ -n "$TargetScript" ]; then
 		! [[ $key =~ "$TargetScript" ]] && continue;
 	fi
     #Test in the command line call configuration
@@ -145,7 +160,7 @@ done < <( for k in "${!testList[@]}"; do echo $k; done | sort )
 
 
 while read -r script; do
-	if ! [ -z "$TargetScript" ]; then
+	if [ -n "$TargetScript" ]; then
 		! [[ $script =~ "$TargetScript" ]] && continue;
     fi
     result="[${GREEN}PASS${NC}]"
