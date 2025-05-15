@@ -23,15 +23,17 @@ function CheckVersion {
     		>&2 echo "[ERROR] Attempt to CheckVersion with either an empty version or target"
     		return $EXIT_FAILURE;
     	fi
-        lessOp="-lt"
-        greaterOp="-gt"
+        #Determine if the range termini are open or closed
+        lowerMinAccept=0;
+        upperMaxAccept=0;
+        maxFailOp="-gt"; maxPassOp="-lt"
         if [[ "$lowerStr" =~ ^\+ ]]; then
-            lowerStr="${lowerStr%+}"
-            lessOp="-le"
+            lowerStr="${lowerStr#+}"
+            lowerMinAccept=1;
         fi
         if [ -n "$upperStr" ] && [[ "$upperStr" =~ ^- ]]; then
-            upperStr="${upperStr%-}"
-            greaterOp="-ge"
+            upperStr="${upperStr#-}"
+            upperMaxAccept=-1;
         fi
         read -a sv <<< $(ParseSemanticVersion "$svStr");
         read -a lower <<< $(ParseSemanticVersion "$lowerStr");
@@ -41,45 +43,23 @@ function CheckVersion {
         if [ -n "$upperStr" ]; then
             read -a upper <<< $(ParseSemanticVersion "$upperStr");
         fi
+        cmpMin=0
+        cmpMax=0;
+        #Compare the test version to the lower and upper bounds
         for i in "$majorIdx" "$minorIdx" "$patchIdx"; do
-            minTest="[ ${sv["$i"]} $lessOp ${lower["$i"]} ]"
-            maxTest="[ ${sv["$i"]} $greaterOp ${upper["$i"]} ]"
-            if eval "$minTest" || eval "$maxTest"; then
-                return "$EXIT_FAILURE"
+            if [ "$cmpMin" -eq 0 ]; then
+                [ "${sv[$i]}" -gt "${lower[$i]}" ] && cmpMin=1;
+                [ "${sv[$i]}" -lt "${lower[$i]}" ] && cmpMin=-1;
+            fi
+            if [ "$cmpMax" -eq 0 ]; then
+                [ "${sv[$i]}" -gt "${upper[$i]}" ] && cmpMax=1;
+                [ "${sv[$i]}" -lt "${upper[$i]}" ] && cmpMax=-1;
             fi
         done
-        #if [[ "$targetStr" =~ "\.+-\.+" ]]; then
-        #    >&2 echo "RangeCase"
-        #    #Range of versions case
-        #    read -d '-' -a targetRange <<< "$targetStr";
-        #    read -a minTarget <<< $(ParseSemanticVersion "${targetRange[0]}");
-        #    read -a maxTarget <<< $(ParseSemanticVersion "${targetRange[1]}");
-        #    for i in "$majorIdx" "$minorIdx" "$patchIdx"; do
-        #        
-        #    done
-        #elif [[ "$targetStr" =~ \+$ ]]; then
-        #    >&2 echo "MinCase"
-        #    targetStr="${targetStr%+}"
-        #    #Minimum Version Case
-        #    read -a minTarget <<< $(ParseSemanticVersion "$targetStr");
-        #    for i in "$majorIdx" "$minorIdx" "$patchIdx"; do
-        #        if [ "${sv["$i"]}" -gt "${minTarget["$i"]}" ]; then
-        #            return "$EXIT_SUCCESS"
-        #        elif [ "${sv["$i"]}" -lt "${minTarget["$i"]}" ]; then
-        #            return "$EXIT_FAILURE"
-        #        fi
-        #    done
-        #else
-        #    >&2 echo "ExactCase"
-        #    #Exact Version Case
-        #    read -a exactTarget <<< $(ParseSemanticVersion "$targetStr");
-        #    for i in "$majorIdx" "$minorIdx" "$patchIdx"; do
-        #        if [ "${sv["$i"]}" -ne "${exactTarget["$i"]}" ]; then
-        #            return "$EXIT_FAILURE"
-        #        fi
-        #    done
-        #fi
-
+        #Test if the targets are met
+        [ "$cmpMin" -lt "$lowerMinAccept" ] && return "$EXIT_FAILURE";
+        [ "$cmpMax" -gt "$upperMaxAccept" ] && return "$EXIT_FAILURE"
+        return "$EXIT_SUCCESS"
     )
     #Forward subshell exit code
     return $?;
