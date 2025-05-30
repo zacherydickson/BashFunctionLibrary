@@ -57,6 +57,8 @@ function IsNumeric {
 	    		#Either X with optional point zero (X is either optionally positive 1 or optionally signed 0)
 	    		# or optionally positive zero with optional point something
 	    		UnitIV)			re="^(([+]?1|[+-]?0)([.]0+)?|[+]?0([.][0-9]+)?)$";;
+	    		#Optionally positive leading zero followed by period and a non zero value
+                OpenUnitIV)			re="^([+]?0)?\.[0-9]*[1-9][0-9]*$";;
 	    		*) 
 	    			re="^[+-]?[0-9]+([.][0-9]+)?$"
 	    			>&2 echo "[WARNING] Unrecognized numeric type ($numType) argument to IsNumeric - assuming Real"

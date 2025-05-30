@@ -76,7 +76,7 @@ testVal=(-100.56 -100 -012 -11.22 -11 -11.0 -5.9 -1 -0.8 -0.0001000 -0.0000007 \
 		 -0 -0.0 0 +0 +0.0 "-dog" "+dog" "mouse.house" "'5 6'" "' 510'" "'-24	'")
 numTypeList=(Real PosReal NonNegReal NegReal NonPosReal \
 				Int Natural Whole NegInt NonPosInt \
-				UnitIV Unrecognized);
+				UnitIV OpenUnitIV Unrecognized);
 for numType in "${numTypeList[@]}"; do
 	case $numType in
 		Unrecognized) : ;&
@@ -91,6 +91,7 @@ for numType in "${numTypeList[@]}"; do
 		NegInt) negateIdxList=(0 3 5 6 $(seq 8 42) 44);;
 		NonPosInt) negateIdxList=(0 3 5 6 $(seq 8 32) 34 $(seq 37 42) 44);;
 		UnitIV) negateIdxList=($(seq 0 17) $(seq 22 28) $(seq 38 44));;
+		OpenUnitIV) negateIdxList=($(seq 0 18) $(seq 22 29) $(seq 33 44));;
 	esac
 	negateIdxIdx=0;
 	for i in $(seq 0 ${#testVal[@]}); do
